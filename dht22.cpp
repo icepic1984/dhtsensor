@@ -77,7 +77,7 @@ DHTSensorCodes DHTSensor::read()
 	//cycles. That is 16 clock cycles per us (16*10^6 / 10^6, 10^6 us
 	//are one second). 100us are therefore 1600 clock cycles. One loop
 	//step will need approx. 4 clock cycles (4 instructions),
-	//therefore we need 400 loop steps.
+	//therefore we need 400 loop steps to detect a timeout.
 	pinMode(pin,INPUT);
 	int loop_count = 400;
 	while ( digitalRead(pin) == LOW ) {
@@ -112,6 +112,8 @@ DHTSensorCodes DHTSensor::read()
 		//The following high-voltage signal decides if bit is 0 or 1.
 		//Signal is high for 26-28us => 0
 		//Signal is high for 70us    => 1
+		//We measure, how long the signal is high. For more then 40us 
+		//we set the current bit to 1.
 		unsigned long t = micros();
 		loop_count = 400;
 		while ( digitalRead(pin) == HIGH ) {
@@ -121,8 +123,12 @@ DHTSensorCodes DHTSensor::read()
 		}
 		unsigned long e = micros() - t;
 		
+		//When signal is HIGH for more then 40us we set the current
+		//bit to one.
 		if ( e > 40 ) data[idx] |= mask;
+		//Shift the mask by one bit to the right
 		mask >>= 1;
+		//if mask equals to zero one byte is complete
 		if ( mask == 0 ) {
 			mask = 128;
 			idx++;
