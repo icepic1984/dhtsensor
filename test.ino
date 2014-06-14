@@ -1,10 +1,4 @@
-//#include "DHT.h"
 #include "dht22.h"
-
-#define DHTPIN 10
-#define DHTTYPE DHT22
-
-//DHT dht(DHTPIN, DHTTYPE);
 
 DHTSensor dht(DHTPIN);
 
