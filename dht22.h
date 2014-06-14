@@ -4,6 +4,11 @@
 
 
 // http://www.adafruit.com/datasheets/Digital%20humidity%20and%20temperature%20sensor%20AM2302.pdf
+enum DHTSensorCodes {
+  DHTSENSOR_OK,
+  DHTSENSOR_TIMEOUT,
+  DHTSENSOR_CURRUPTION
+};
 
 class DHTSensor
 {
@@ -11,10 +16,14 @@ public:
    DHTSensor(uint8_t pin_);
    float getTemperature();
    float getHumidity();
+   DHTSensorCodes readDataFromSensor();
    
 private:
-   void read();
+   DHTSensorCodes read();
    uint8_t pin;
+   float temperature;
+   float humidity;
+   uint8_t data[5];
 };
 
 
