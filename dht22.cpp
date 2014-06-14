@@ -2,7 +2,8 @@
 
 DHTSensor::DHTSensor(uint8_t pin_) : pin(pin_),
 									 temperature(0.0),
-									 humidity(0.0)
+									 humidity(0.0),
+									 elapsed(0)
 {}
 
 float DHTSensor::getTemperature()
@@ -17,34 +18,41 @@ float DHTSensor::getHumidity()
 
 DHTSensorCodes DHTSensor::readDataFromSensor()
 {
-	DHTSensorCodes err = read();
-	if ( err == DHTSENSOR_OK) {
-		//Check checksum
-		uint8_t sum = data[0] + data[1] + data[2] + data[3];
-		if ( sum == data[4]) {
-			//Humditiy is first two bits divided by 10
-			uint16_t t_hum = data[0];
-			t_hum <<= 8;
-			t_hum |= data[1];
-			humidity = static_cast<float>(t_hum) * 0.1f;
-			//Check if first bit of temperature is one -> minus degree
-			if( data[2] & 128) {
-				uint16_t t_temp = data[2] & 127;
-				t_temp <<= 8;
-				t_temp |= data[3];
-				temperature =  -0.1f * static_cast<float>(t_temp);
+	//According to specs sensor can be queried only after 2secs.
+	if ( millis() -  elapsed > 2000 ) {
+		elapsed = millis();
+		DHTSensorCodes err = read();
+		if ( err == DHTSENSOR_OK) {
+			//Check checksum
+			uint8_t sum = data[0] + data[1] + data[2] + data[3];
+			if ( sum == data[4]) {
+				//Humidity is first two bits divided by 10
+				uint16_t t_hum = data[0];
+				t_hum <<= 8;
+				t_hum |= data[1];
+				humidity = static_cast<float>(t_hum) * 0.1f;
+				//Check if first bit of temperature is one -> minus degree
+				if( data[2] & 128) {
+					uint16_t t_temp = data[2] & 127;
+					t_temp <<= 8;
+					t_temp |= data[3];
+					temperature =  -0.1f * static_cast<float>(t_temp);
+				} else {
+					uint16_t t_temp = data[2];
+					t_temp <<= 8;
+					t_temp |= data[3];
+					temperature = static_cast<float>(t_temp) * 0.1f;
+				}
+				return DHTSENSOR_OK;
+			} else {
+				return DHTSENSOR_CURRUPTION;
 			}
-			uint16_t t_temp = data[2];
-			t_temp <<= 8;
-			t_temp |= data[3];
-			temperature = static_cast<float>(t_temp) * 0.1f;
-			return DHTSENSOR_OK;
-		} else {
-			return DHTSENSOR_CURRUPTION;
-		}
-	};
-	return err;
+		};
+		return err;
+	}
+	return DHTSENSOR_READTOFAST;
 }
+
 
 DHTSensorCodes DHTSensor::read()
 {
@@ -77,7 +85,7 @@ DHTSensorCodes DHTSensor::read()
 			return DHTSENSOR_TIMEOUT;
 		}
 	}			
-	//DHT22 pulls up bus for 80us for preperation to send data.
+	//DHT22 pulls up bus for 80us for preparation to send data.
 	loop_count = 400;
 	while( digitalRead(pin) == HIGH ){
 		if( --loop_count == 0 ) {

@@ -7,7 +7,8 @@
 enum DHTSensorCodes {
   DHTSENSOR_OK,
   DHTSENSOR_TIMEOUT,
-  DHTSENSOR_CURRUPTION
+  DHTSENSOR_CURRUPTION,
+  DHTSENSOR_READTOFAST
 };
 
 class DHTSensor
@@ -23,6 +24,7 @@ private:
    uint8_t pin;
    float temperature;
    float humidity;
+   unsigned long elapsed;
    uint8_t data[5];
 };
 

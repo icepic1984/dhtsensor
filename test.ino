@@ -21,7 +21,7 @@ void loop()
 		Serial.println(dht.getTemperature());
 		Serial.println(dht.getHumidity());
 	} else {
-		Serial.print("ERROR reading sensor");
+		Serial.println("ERROR reading sensor");
 	}
 }
 
