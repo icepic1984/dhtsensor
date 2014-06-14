@@ -16,12 +16,17 @@ void setup()
 
 void loop() 
 {
-	delay(2000);
 	if ( DHTSENSOR_OK == dht.readDataFromSensor() ) {
-		Serial.println(dht.getTemperature());
-		Serial.println(dht.getHumidity());
+		Serial.print("Temperature: ");
+		Serial.print(dht.getTemperature());
+		Serial.print("C ");
+		Serial.print(" Humidity: ");
+		Serial.print(dht.getHumidity());
+		Serial.println("%");
 	} else {
 		Serial.println("ERROR reading sensor");
 	}
+	delay(2000);
+
 }
 
