@@ -7,32 +7,43 @@ DHTSensor::DHTSensor(uint8_t pin_) : pin(pin_),
 
 float DHTSensor::getTemperature()
 {
-	read();
+	return temperature;
+}
+
+float DHTSensor::getHumidity()
+{
+	return humidity;
 }
 
 DHTSensorCodes DHTSensor::readDataFromSensor()
 {
 	DHTSensorCodes err = read();
 	if ( err == DHTSENSOR_OK) {
-		if ( data[0] + 
-			 data[1] + 
-			 data[2] + 
-			 data[3] == data[4]) {
-				uint16_t t_hum = data[0];
-				t_hum <<= 8;
-				t_hum |= data[1];
-				humidity = static_cast<float>(t_hum) / 10.0f;
-				return DHTSENSOR_OK;
+		//Check checksum
+		uint8_t sum = data[0] + data[1] + data[2] + data[3];
+		if ( sum == data[4]) {
+			//Humditiy is first two bits divided by 10
+			uint16_t t_hum = data[0];
+			t_hum <<= 8;
+			t_hum |= data[1];
+			humidity = static_cast<float>(t_hum) * 0.1f;
+			//Check if first bit of temperature is one -> minus degree
+			if( data[2] & 128) {
+				uint16_t t_temp = data[2] & 127;
+				t_temp <<= 8;
+				t_temp |= data[3];
+				temperature =  -0.1f * static_cast<float>(t_temp);
+			}
+			uint16_t t_temp = data[2];
+			t_temp <<= 8;
+			t_temp |= data[3];
+			temperature = static_cast<float>(t_temp) * 0.1f;
+			return DHTSENSOR_OK;
 		} else {
 			return DHTSENSOR_CURRUPTION;
 		}
 	};
 	return err;
-}
-
-float DHTSensor::getHumidity()
-{
-	return 0.0;
 }
 
 DHTSensorCodes DHTSensor::read()
