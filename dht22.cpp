@@ -3,7 +3,7 @@
 DHTSensor::DHTSensor(uint8_t pin_) : pin(pin_),
 									 temperature(0.0),
 									 humidity(0.0),
-									 elapsed(0)
+									 elapsed(2000)
 {}
 
 float DHTSensor::getTemperature()
@@ -19,7 +19,7 @@ float DHTSensor::getHumidity()
 DHTSensorCodes DHTSensor::readDataFromSensor()
 {
 	//According to specs sensor can be queried only after 2secs.
-	if ( millis() -  elapsed > 2000 ) {
+	if ( millis() -  elapsed >= 2000 ) {
 		elapsed = millis();
 		DHTSensorCodes err = read();
 		if ( err == DHTSENSOR_OK) {
