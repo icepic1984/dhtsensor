@@ -1,7 +1,7 @@
 #include "dht22.h"
 
 DHTSensor::DHTSensor(uint8_t pin_) : pin(pin_),
-									 temperature(0.0),
+									 emperature(0.0),
 									 humidity(0.0),
 									 elapsed(2000)
 {}
@@ -92,7 +92,7 @@ DHTSensorCodes DHTSensor::read()
 			return DHTSENSOR_TIMEOUT;
 		}
 	}
-    //DHT22 sends 40bits to mcu:
+	//DHT22 sends 40bits to mcu:
 	//First 16Bit: Humidity
 	//Second 16Bit: Temperature
 	//Last 8Bit:  Checksum
@@ -137,6 +137,3 @@ DHTSensorCodes DHTSensor::read()
 	return DHTSENSOR_OK;
 }
 
-
-
-	
